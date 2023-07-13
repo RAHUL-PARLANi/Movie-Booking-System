@@ -1,42 +1,83 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
-import movieData from "../../components/movieData";
 
-const EditMovie = () => {
+const AddMovie = () => {
   const [image, setImage] = useState("");
   const [movieName, setMovieName] = useState("");
   const [price, setPrice] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [seats, setSeats] = useState("");
+  const [seats, setSeats] = useState(0);
   const [description, setDescription] = useState("");
   const [likes, setLikes] = useState("");
   const [genre, setGenre] = useState("");
-  const [isRecommemded, setIsRecommemded] = useState("");
+  const [isRecommemded, setIsRecommemded] = useState(0);
 
   useEffect(() => {
-    const data = movieData.find((elem) => {
-      return (
-        elem.movieName ==
-        window.location.href.split("/").pop().replaceAll("%20", " ")
-      );
-    });
-    setSeats(data.noOfSeats);
-    setImage(data.moviePoster);
-    setDescription(data.description);
-    setEndDate(data.endDate);
-    setIsRecommemded(data.isRecommemded);
-    setMovieName(data.movieName);
-    setPrice(data.price);
-    setDescription(data.description);
-    setGenre(data.genre);
-    setReleaseDate(data.releaseDate);
-    setEndDate(data.endDate);
-  }, []);
+    axios.get('http://localhost:5000/movie/'+window.location.href.split('/').pop()).then(
+     res=>{
+      console.log(res.data[0])
+      setMovieName(res.data[0].MOVIENAME)
+      setDescription(res.data[0].DESCRIPTION)
+      setIsRecommemded(res.data[0].ISRECOMMENDED)
+      setGenre(res.data[0].GENRE)
+      setPrice(res.data[0].PRICE)
+      setReleaseDate(formatDate(res.data[0].RELEASEDATE))
+      setEndDate(formatDate(res.data[0].ENDDATE))
+      setSeats(res.data[0].NOOFSEATS)
+      setImage(res.data[0].IMAGEURL)
+    } 
+    ).catch(err=>console.log(err))
+  }, [])
 
+  function formatDate(dateString){
+    var dateObj = new Date(dateString);
+      
+      var year = dateObj.getUTCFullYear();
+      var month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+      var day = String(dateObj.getUTCDate()).padStart(2, '0');
+      
+      var formattedDate = year + '-' + month + '-' + day;
+      return formattedDate;
+  }
+  const handleSubmit=()=>{    
+    console.log({
+      "movieName":movieName,
+      "releaseDate":releaseDate,
+      "endDate":endDate,
+      "noOfSeats":Number(seats),
+      "imageUrl":image,
+      "description":description,
+      "isRecommended":isRecommemded,
+      "genre":genre,
+      "price":price
+      })
+    axios.patch('http://localhost:5000/movie/'+window.location.href.split('/').pop(),{
+    "movieName":movieName,
+    "releaseDate":releaseDate,
+    "endDate":endDate,
+    "noOfSeats":seats,
+    "imageUrl":image,
+    "description":description,
+    "isRecommended":isRecommemded,
+    "genre":genre,
+    "price":price
+    }).then(res=>{
+      if(res.data.message){
+        alert(res.data.message)
+      }else{
+        alert('Something went Wrong')
+      }
+    }).catch(err=>console.log(err))
+  }
   return (
-    <div>
+    <div className="container-fluid">
       <Form
+        onSubmit={(e)=>{
+          e.preventDefault()
+          handleSubmit()
+        }}
         className="p-4 px-6 border-2 border border-primary rounded mb-3"
         style={{
           fontWeight: 600,
@@ -98,6 +139,9 @@ const EditMovie = () => {
             type="Number"
             value={seats}
             disabled
+            onChange={(e) => {
+              setSeats(e.target.value);
+            }}
             className="border border-primary border-2"
           />
         </Form.Group>
@@ -125,8 +169,8 @@ const EditMovie = () => {
             className="border border-primary border-2"
           >
             <option value="">choose</option>
-            <option value="1">On</option>
-            <option value="0">Off</option>
+            <option value={1}>On</option>
+            <option value={0}>Off</option>
           </Form.Select>
         </Form.Group>
 
@@ -141,13 +185,15 @@ const EditMovie = () => {
             }}
           />
         </Form.Group>
-        <Form.Group className="mb-3" controlId="formFile">
+
+        <Form.Group className="mb-3 mt-3" controlId="formFile">
           <Form.Label>Movie Poster</Form.Label>
           <Form.Control
-            type="file"
+            type="text"
+            value={image}
             className="border border-primary border-2"
             onChange={(e) => {
-              setImage(e.target.files[0]);
+              setImage(e.target.value);
             }}
           />
         </Form.Group>
@@ -158,7 +204,7 @@ const EditMovie = () => {
               <h6>Preview</h6>
               <img
                 className="rounded"
-                src={image}
+                src={(image)}
                 style={{ border: "2px solid black" }}
                 height={"300px"}
               />
@@ -166,12 +212,12 @@ const EditMovie = () => {
           </>
         )}
         <div style={{ textAlign: "left" }} className="mb-2">
-          <button className="btn btn-outline-primary mt-3"> Reset </button>
-          <button className="btn btn-primary mt-3 ms-2"> Edit </button>
+          <button className="btn btn-outline-primary  mt-3" type='reset'> Reset </button>
+          <button className="btn btn-primary mt-3 ms-2" type='submit'> EDIT </button>
         </div>
       </Form>
     </div>
   );
 };
 
-export default EditMovie;
+export default AddMovie;

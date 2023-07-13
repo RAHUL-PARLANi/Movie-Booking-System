@@ -1,11 +1,32 @@
 import React, { useState } from 'react'
 import Form from "react-bootstrap/Form";
+import axios from "axios"
+import { useDispatch, useSelector } from "react-redux"
+import { login } from '../../features/user';
 
 const AdminLogin = () => {
 const [email,setEmail]=useState("");
 const [password,setPassword]=useState("")
 
-    return (
+const dispatch = useDispatch();
+
+const handleSubmit=()=>{
+      
+      axios.post('http://localhost:5000/login',{password:password,emailId:email}).then(elem=>{
+          if(elem.data.message){
+            alert(elem.data.message)
+          }else{
+            dispatch(login({
+              emailId: elem.data.emailId,
+              role: elem.data.role,
+              userId: elem.data.userId,
+              userName: elem.data.userName
+            }))
+          }
+      }).catch(err=>console.log('Something went Wrong'))
+}
+
+return (
     <div className='container-fluid'>
         <Form
         className="p-4 px-6 border-2 border border-primary rounded mb-3"
@@ -25,6 +46,7 @@ const [password,setPassword]=useState("")
             className="border border-primary border-2"
             type="email"
             value={email}
+            required
             onChange={(e) => {
               setEmail(e.target.value);
             }}
@@ -36,12 +58,15 @@ const [password,setPassword]=useState("")
             type="password"
             className="border border-primary border-2"
             value={password}
+            required
             onChange={(e) => {
               setPassword(e.target.value);
             }}
           />
         </Form.Group>   
-          <button className="btn btn-primary mt-3 ms-2"> Login </button>
+          <button onClick={(e)=>{e.preventDefault()
+          handleSubmit()
+          }} className="btn btn-primary mt-3 ms-2"> Login </button>
       </Form>
 
     </div>

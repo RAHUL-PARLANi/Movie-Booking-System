@@ -1,3 +1,4 @@
+import React from 'react'
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
@@ -7,23 +8,24 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { logout } from "../features/user";
 
-function MainNavbar() {
+const UserNavbar = () => {
+  
   const userData = useSelector(state=>state.users.value);
   const dispatch=useDispatch()
   return (
-    <>
-      {["xl"].map((expand) => (
+    <div>
+       {["xl"].map((expand) => (
         <Navbar
           key={expand}
           expand={expand}
           bg="primary"
-          data-bs-theme="blue"
+          data-bs-theme="white"
           className="bg-body-primary mb-3"
         >
           <Container fluid>
             <Link to="/admin" style={{ textDecoration: "inherit" }}>
               <Navbar.Brand className="fw-bold">
-                Movie Bookerz... Admin Panel
+                Movie Bookerz...
               </Navbar.Brand>
             </Link>
             <Navbar.Toggle aria-controls={`offcanvasNavbar-expand-${expand}`} />
@@ -42,26 +44,11 @@ function MainNavbar() {
                   {userData.isAuthenticated == true? (
                     <>
                       <Link
-                        to={"/admin/"}
+                        to={"/mytickets/"}
                         style={{ textDecoration: "inherit" }}
                       >
-                        <div className="fw-bold text-white m-2">Dashboard</div>
+                        <div className="fw-bold text-white m-2">MyTickets</div>
                       </Link>
-                      <Link
-                        to={"/admin/showAllMovies"}
-                        style={{ textDecoration: "inherit" }}
-                      >
-                        <div className="fw-bold text-white m-2">
-                          Show Movies
-                        </div>
-                      </Link>
-                      <Link
-                        to={"/admin/addMovie"}
-                        style={{ textDecoration: "inherit" }}
-                      >
-                        <div className="fw-bold text-white m-2">Add Movies</div>
-                      </Link>
-
                       <NavDropdown
                         title={userData.userName}
                         color="white"
@@ -91,7 +78,8 @@ function MainNavbar() {
           </Container>
         </Navbar>
       ))}
-    </>
-  );
+    </div>
+  )
 }
-export default MainNavbar;
+
+export default UserNavbar
